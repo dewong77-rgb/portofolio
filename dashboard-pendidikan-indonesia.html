@@ -1,0 +1,711 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard Pendidikan Indonesia 2022–2025 — Dewong Kurniawan</title>
+<meta name="description" content="Analisis korelasi putus sekolah SMP-SMA, kondisi ruang kelas, dan kualifikasi pendidik SMA per provinsi — Dewong Kurniawan">
+<meta name="author" content="Dewong Kurniawan">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;1,400&family=IBM+Plex+Mono:wght@400;500&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#f7f4ef;--bg2:#f0ece4;--surface:#fff;--border:#ddd9d0;--border2:#ece8e0;
+  --text:#2a2520;--body:#4a4540;--muted:#8a8278;--dim:#b8b0a5;
+  --smp:#2c5f8a;--smp-bg:#eef3f8;
+  --sma:#b85c1a;--sma-bg:#fdf2ea;
+  --rusak:#a82828;--rusak-bg:#fdf0f0;
+  --baik:#2d7d4e;--baik-bg:#edf7f1;
+  --guru:#6b4fa0;--guru-bg:#f3f0f9;
+  --amber:#b08800;--amber-bg:#fdf8e8;
+  --serif:'Lora',Georgia,serif;
+  --mono:'IBM Plex Mono',monospace;
+  --sans:'Outfit',system-ui,sans-serif;
+  --sh-sm:0 1px 3px rgba(42,37,32,.06),0 1px 8px rgba(42,37,32,.04);
+  --sh:0 2px 12px rgba(42,37,32,.08),0 1px 4px rgba(42,37,32,.05);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:15px;line-height:1.65;-webkit-font-smoothing:antialiased}
+.reveal{opacity:0;transform:translateY(20px);transition:opacity .6s cubic-bezier(.4,0,.2,1),transform .6s cubic-bezier(.4,0,.2,1)}
+.reveal.visible{opacity:1;transform:translateY(0)}
+.d1{transition-delay:.05s}.d2{transition-delay:.1s}.d3{transition-delay:.15s}
+.d4{transition-delay:.2s}.d5{transition-delay:.25s}.d6{transition-delay:.3s}
+header{background:var(--surface);border-bottom:1px solid var(--border);box-shadow:var(--sh-sm);position:sticky;top:0;z-index:50}
+.hdr{max-width:1100px;margin:0 auto;padding:.7rem 1.5rem;display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap}
+.hdr-brand{font-family:var(--serif);font-size:15px;color:var(--text);font-style:italic}
+.nav-tabs{display:flex;background:var(--bg2);border:1px solid var(--border);border-radius:8px;overflow:hidden;flex-wrap:wrap}
+.nav-tab{font-family:var(--mono);font-size:10px;letter-spacing:.06em;text-transform:uppercase;padding:.4rem .85rem;cursor:pointer;color:var(--muted);background:transparent;border:none;transition:all .14s;white-space:nowrap}
+.nav-tab:hover{color:var(--body);background:var(--border2)}
+.nav-tab.active{background:var(--surface);color:var(--text);font-weight:500;box-shadow:var(--sh-sm)}
+.hero{background:linear-gradient(135deg,#f7f4ef 0%,#f3f0f9 50%,#f0ece4 100%);border-bottom:1px solid var(--border);padding:3.5rem 1.5rem 3rem}
+.hero-inner{max-width:1100px;margin:0 auto}
+.kicker{font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--guru);margin-bottom:1rem;display:flex;align-items:center;gap:.6rem}
+.kicker::before{content:'';width:22px;height:2px;background:var(--guru);border-radius:1px}
+.hero h1{font-family:var(--serif);font-size:clamp(1.8rem,4vw,3rem);font-weight:600;line-height:1.1;color:var(--text);max-width:700px;margin-bottom:1rem}
+.hero h1 em{font-style:italic;color:var(--guru)}
+.hero-lead{color:var(--body);font-size:14.5px;max-width:580px;line-height:1.8;margin-bottom:1.8rem}
+.hero-meta{display:flex;flex-wrap:wrap;gap:.7rem 2rem;font-family:var(--mono);font-size:10.5px;color:var(--dim);border-top:1px solid var(--border);padding-top:1rem}
+.hero-meta b{color:var(--muted);font-weight:500}
+.page{display:none}
+.page.active{display:block}
+main{max-width:1100px;margin:0 auto;padding:0 1.5rem 5rem}
+section{margin-top:3rem}
+.sh{display:flex;align-items:center;gap:.8rem;margin-bottom:1.3rem}
+.sn{font-family:var(--mono);font-size:10px;color:var(--dim);letter-spacing:.1em;flex-shrink:0}
+.st{font-family:var(--serif);font-size:1.2rem;font-weight:600;color:var(--text)}
+.sl{flex:1;height:1px;background:var(--border)}
+/* CARDS */
+.cg{display:grid;grid-template-columns:repeat(auto-fit,minmax(155px,1fr));gap:.65rem}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.1rem 1.2rem;box-shadow:var(--sh-sm);position:relative;overflow:hidden;transition:transform .18s,box-shadow .18s}
+.card:hover{transform:translateY(-2px);box-shadow:var(--sh)}
+.card::after{content:'';position:absolute;bottom:0;left:0;right:0;height:3px;border-radius:0 0 10px 10px}
+.c-smp::after{background:var(--smp)}.c-sma::after{background:var(--sma)}
+.c-rusak::after{background:var(--rusak)}.c-baik::after{background:var(--baik)}
+.c-guru::after{background:var(--guru)}.c-amber::after{background:var(--amber)}
+.ci{width:28px;height:28px;border-radius:7px;display:flex;align-items:center;justify-content:center;margin-bottom:.65rem;font-size:12px}
+.c-smp .ci{background:var(--smp-bg);color:var(--smp)}
+.c-sma .ci{background:var(--sma-bg);color:var(--sma)}
+.c-rusak .ci{background:var(--rusak-bg);color:var(--rusak)}
+.c-baik .ci{background:var(--baik-bg);color:var(--baik)}
+.c-guru .ci{background:var(--guru-bg);color:var(--guru)}
+.c-amber .ci{background:var(--amber-bg);color:var(--amber)}
+.cl{font-family:var(--mono);font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:.4rem}
+.cv{font-family:var(--serif);font-size:1.65rem;font-weight:600;line-height:1;color:var(--text);margin-bottom:.25rem}
+.cs{font-family:var(--mono);font-size:10.5px;color:var(--dim)}
+.cs strong{font-weight:500}
+.c-smp .cs strong{color:var(--smp)}.c-sma .cs strong{color:var(--sma)}
+.c-rusak .cs strong{color:var(--rusak)}.c-baik .cs strong{color:var(--baik)}
+.c-guru .cs strong{color:var(--guru)}.c-amber .cs strong{color:var(--amber)}
+/* NARASI */
+.narasi{border-radius:0 8px 8px 0;padding:.9rem 1.1rem;margin-top:1rem;font-size:13.5px;color:var(--body);line-height:1.85}
+.narasi strong{color:var(--text)}
+.narasi.ns{background:var(--smp-bg);border-left:3px solid var(--smp)}
+.narasi.na{background:var(--sma-bg);border-left:3px solid var(--sma)}
+.narasi.nr{background:var(--rusak-bg);border-left:3px solid var(--rusak)}
+.narasi.ng{background:var(--guru-bg);border-left:3px solid var(--guru)}
+.narasi.nm{background:var(--amber-bg);border-left:3px solid var(--amber)}
+/* DATA NOTE */
+.data-note{font-family:var(--mono);font-size:10.5px;color:var(--muted);background:var(--guru-bg);border:1px solid rgba(107,79,160,.15);border-radius:6px;padding:.5rem .9rem;margin-bottom:.9rem;line-height:1.6}
+.asumsi-note{font-family:var(--mono);font-size:10.5px;color:var(--amber);background:var(--amber-bg);border:1px solid rgba(176,136,0,.2);border-radius:6px;padding:.5rem .9rem;margin-top:.7rem;line-height:1.6}
+/* CTRL */
+.ctrl-row{display:flex;flex-wrap:wrap;gap:.45rem;margin-bottom:.9rem;align-items:center}
+.sl2{font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--dim)}
+.cbtn{font-family:var(--mono);font-size:11px;padding:.35rem .85rem;border:1.5px solid var(--border);background:var(--surface);color:var(--muted);cursor:pointer;border-radius:20px;transition:all .14s;box-shadow:var(--sh-sm)}
+.cbtn:hover{border-color:var(--dim);color:var(--body)}
+.cbtn.on{background:var(--text);border-color:var(--text);color:#f7f4ef}
+/* BAR */
+.bwrap{background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;box-shadow:var(--sh-sm)}
+.brow{display:grid;grid-template-columns:155px 1fr 60px;align-items:center;gap:.7rem;padding:.45rem .85rem;border-bottom:1px solid var(--border2);transition:background .12s;cursor:default}
+.brow:last-child{border-bottom:none}
+.brow:hover{background:var(--bg2)}
+@media(max-width:480px){.brow{grid-template-columns:108px 1fr 46px}}
+.bprov{font-size:12.5px;color:var(--body);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.brow:hover .bprov{color:var(--text)}
+.btrack{height:13px;background:var(--bg2);border-radius:3px;overflow:hidden}
+.bfill{height:100%;border-radius:3px;transition:width .5s cubic-bezier(.4,0,.2,1);width:0%}
+.bnum{font-family:var(--mono);font-size:11px;color:var(--dim);text-align:right}
+.brow:hover .bnum{color:var(--body)}
+/* SCATTER */
+.scat-box{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:1.2rem;box-shadow:var(--sh-sm)}
+.scat-ttl{font-family:var(--serif);font-size:1rem;font-weight:600;color:var(--text);margin-bottom:.25rem}
+.scat-sub{font-family:var(--mono);font-size:10.5px;color:var(--muted);margin-bottom:.9rem}
+canvas.scv{width:100%;display:block;border-radius:6px}
+/* TABLE */
+.twrap{overflow-x:auto}
+.dtbl{width:100%;border-collapse:collapse;font-size:12.5px;min-width:640px;background:var(--surface);border-radius:12px;overflow:hidden;box-shadow:var(--sh-sm)}
+.dtbl thead{background:var(--bg2);border-bottom:1px solid var(--border)}
+.dtbl th{font-family:var(--mono);font-size:9px;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);padding:.6rem .75rem;text-align:right;font-weight:500}
+.dtbl th:first-child{text-align:left}
+.dtbl th.h-s{color:var(--smp)}.dtbl th.h-a{color:var(--sma)}
+.dtbl th.h-r{color:var(--rusak)}.dtbl th.h-g{color:var(--guru)}
+.dtbl td{padding:.48rem .75rem;border-bottom:1px solid var(--border2);text-align:right;color:var(--body);font-size:12px}
+.dtbl td:first-child{text-align:left;color:var(--text);font-weight:500}
+.dtbl tbody tr:hover td{background:var(--bg2)}
+.dtbl .trt td{background:var(--bg2);font-weight:600;border-top:2px solid var(--border);color:var(--text);font-family:var(--mono);font-size:11px}
+.pill{display:inline-block;font-family:var(--mono);font-size:9.5px;padding:1px 6px;border-radius:10px;font-weight:500}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:.75rem}
+@media(max-width:700px){.two-col{grid-template-columns:1fr}}
+.tooltip{position:fixed;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:.6rem .85rem;font-size:12px;color:var(--text);box-shadow:var(--sh);pointer-events:none;display:none;z-index:200;max-width:220px;line-height:1.6}
+footer{border-top:1px solid var(--border);max-width:1100px;margin:4rem auto 0;padding:1.5rem;display:flex;flex-wrap:wrap;justify-content:space-between;gap:1rem;font-family:var(--mono);font-size:11px;color:var(--dim)}
+footer a{color:var(--muted);text-decoration:none}
+footer a:hover{color:var(--text)}
+::-webkit-scrollbar{width:5px;height:5px}
+::-webkit-scrollbar-track{background:var(--bg2)}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
+</style>
+</head>
+<body>
+<header>
+  <div class="hdr">
+    <div class="hdr-brand">Dewong Kurniawan</div>
+    <div class="nav-tabs" id="nav-tabs">
+      <button class="nav-tab active" data-page="gabungan">Gabungan + Korelasi</button>
+      <button class="nav-tab" data-page="guru">Kualifikasi Pendidik</button>
+      <button class="nav-tab" data-page="smp">Putus Sekolah SMP</button>
+      <button class="nav-tab" data-page="sma">Putus Sekolah SMA</button>
+      <button class="nav-tab" data-page="sarpras">Kondisi Ruang Kelas</button>
+    </div>
+  </div>
+</header>
+
+<div class="hero">
+  <div class="hero-inner reveal">
+    <div class="kicker">Portofolio Analisis Data Pendidikan Indonesia</div>
+    <h1>Empat Dataset,<br><em>Satu Potret</em><br>Pendidikan Indonesia</h1>
+    <p class="hero-lead">
+      Putus sekolah SMP &amp; SMA, kondisi ruang kelas SMA, dan kualifikasi pendidik SMP &amp; SMA
+      dibaca bersama sebagai satu sistem. Data per provinsi dari tiga sumber resmi Kemendikdasmen.
+    </p>
+    <div class="hero-meta">
+      <span><b>Sumber 1</b> Dapodik / Kemendikdasmen, TA 2022/2023</span>
+      <span><b>Sumber 2</b> Statistik SMA 2024/2025, Pusdatin</span>
+      <span><b>Sumber 3</b> Ikhtisar Data Pendidikan 2024/2025, Pusdatin (Tabel 19 &amp; 20)</span>
+      <span><b>Penyusun</b> Dewong Kurniawan</span>
+    </div>
+  </div>
+</div>
+
+<main>
+
+<!-- ══ PAGE: GABUNGAN ══════════════════════════════════════════════ -->
+<div class="page active" id="page-gabungan">
+  <section>
+    <div class="sh reveal"><span class="sn">01</span><h2 class="st">Ringkasan Empat Indikator</h2><div class="sl"></div></div>
+    <div class="cg">
+      <div class="card c-smp reveal d1"><div class="ci">▣</div><div class="cl">Putus Sekolah SMP</div><div class="cv" data-target="13716">0</div><div class="cs"><strong>TA 2022/2023</strong> · 34 provinsi</div></div>
+      <div class="card c-sma reveal d2"><div class="ci">▣</div><div class="cl">Putus Sekolah SMA</div><div class="cv" data-target="10091">0</div><div class="cs"><strong>TA 2022/2023</strong> · 34 provinsi</div></div>
+      <div class="card c-rusak reveal d3"><div class="ci">▲</div><div class="cl">RK Rusak (SMA)</div><div class="cv" data-target="76950">0</div><div class="cs"><strong>39,7%</strong> dari 193.743 ruang kelas</div></div>
+      <div class="card c-guru reveal d4"><div class="ci">≥</div><div class="cl">Pendidik ≥S1 SMP</div><div class="cv">98,32%</div><div class="cs"><strong>Nasional</strong> · TA 2024/2025</div></div>
+      <div class="card c-guru reveal d5"><div class="ci">≥</div><div class="cl">Pendidik ≥S1 SMA</div><div class="cv">98,88%</div><div class="cs"><strong>Nasional</strong> · TA 2024/2025</div></div>
+      <div class="card c-amber reveal d6"><div class="ci">!</div><div class="cl">Outlier Kualifikasi</div><div class="cv">90,01%</div><div class="cs"><strong>Papua Pegunungan</strong> SMP — terendah</div></div>
+    </div>
+    <div class="data-note reveal">
+      ⬡ <strong>Catatan sumber data:</strong> "Pendidik Layak" dalam Ikhtisar Data Pendidikan 2024/2025 (Tabel 23) hanya tersedia secara nasional per bentuk satdik — tidak ada breakdown per provinsi. Data per provinsi yang tersedia adalah kualifikasi akademik ≥S1 (Tabel 19 untuk SMP, Tabel 20 untuk SMA). Angka nasional Tabel 23 (SMP 98,32%; SMA 98,88%) identik dengan angka ≥S1 di Tabel 19 &amp; 20, mengkonfirmasi bahwa "layak" dalam dokumen ini setara dengan "memiliki kualifikasi ≥S1".
+    </div>
+    <div class="narasi ng reveal">
+      <strong>Papua Pegunungan adalah outlier terbesar.</strong> Hanya 90,01% pendidik SMP di provinsi ini berkualifikasi ≥S1 — jauh di bawah rata-rata nasional 98,32%. Papua Tengah menyusul dengan 95,42%. Semua provinsi lain berada di atas 96%. Di jenjang SMA, kesenjangan ini menyempit: Papua Pegunungan 96,51%, Papua Tengah 98,26%. <strong>Kesenjangan kualifikasi SMP–SMA di Papua Pegunungan (6,5 poin persentase) adalah yang terbesar di seluruh Indonesia</strong> — mengindikasikan bahwa rekrutmen guru SMP di wilayah ini masih menghadapi hambatan struktural yang tidak sama dengan SMA.
+    </div>
+    <div class="asumsi-note reveal">
+      ⚠ <strong>Perbedaan tahun data:</strong> Data putus sekolah adalah TA 2022/2023; data kualifikasi pendidik dan kondisi ruang kelas adalah TA 2024/2025. Korelasi antar-dataset bersifat indikatif, bukan kausal — selang waktu dua tahun perlu dipertimbangkan dalam interpretasi.
+    </div>
+  </section>
+
+  <section>
+    <div class="sh reveal"><span class="sn">02</span><h2 class="st">Korelasi: % Pendidik ≥S1 SMP vs Putus Sekolah SMP</h2><div class="sl"></div></div>
+    <div class="scat-box reveal">
+      <div class="scat-ttl">Scatter Plot: Kualifikasi Pendidik SMP × Putus Sekolah SMP per Provinsi</div>
+      <div class="scat-sub">Sumbu X = % pendidik SMP berkualifikasi ≥S1 · Sumbu Y = jumlah putus sekolah SMP 2022/2023 · Hover untuk nama provinsi</div>
+      <canvas class="scv" id="cv1" height="340"></canvas>
+    </div>
+    <div class="narasi ns reveal">
+      <strong>Korelasi kualifikasi pendidik SMP vs putus sekolah SMP sangat lemah (r ≈ −0,08).</strong>
+      Hampir semua provinsi memiliki kualifikasi ≥S1 di kisaran 96–99%, sehingga variasi horizontalnya kecil.
+      Putus sekolah justru didominasi oleh faktor lain — ukuran populasi provinsi dan faktor sosial-ekonomi —
+      yang tidak tercermin dalam data kualifikasi. <strong>Ini adalah temuan data, bukan asumsi:</strong>
+      Jawa Timur dan Sumatera Utara memiliki kualifikasi yang baik (98,57% dan 98,29%) namun angka putus sekolah tertinggi.
+    </div>
+  </section>
+
+  <section>
+    <div class="sh reveal"><span class="sn">03</span><h2 class="st">Korelasi: % Pendidik ≥S1 SMA vs Putus Sekolah SMA</h2><div class="sl"></div></div>
+    <div class="scat-box reveal">
+      <div class="scat-ttl">Scatter Plot: Kualifikasi Pendidik SMA × Putus Sekolah SMA per Provinsi</div>
+      <div class="scat-sub">Sumbu X = % pendidik SMA berkualifikasi ≥S1 · Sumbu Y = jumlah putus sekolah SMA 2022/2023</div>
+      <canvas class="scv" id="cv2" height="340"></canvas>
+    </div>
+    <div class="narasi na reveal">
+      <strong>Pola yang sama terjadi di SMA: korelasi kualifikasi–putus sekolah sangat lemah.</strong>
+      Variasi kualifikasi antarprovinsi terlalu kecil (rentang 96,5–99,9%) untuk menjadi prediktor putus sekolah.
+      Yang menarik: <strong>Sulawesi Selatan memiliki kualifikasi pendidik SMA tertinggi kedua (99,32%) namun putus sekolah SMA tertinggi nasional (924 siswa)</strong> —
+      mengkonfirmasi bahwa kualifikasi formal pendidik bukan variabel penjelas utama untuk angka putus sekolah.
+    </div>
+    <div class="asumsi-note reveal">
+      ⚠ <strong>Ini asumsi metodologis, bukan temuan data:</strong> kemungkinan hubungan antara kualifikasi pendidik dan putus sekolah bersifat non-linear atau dimediasi variabel lain (kemiskinan, jarak sekolah, kondisi infrastruktur) yang tidak tersedia dalam dataset yang digunakan di sini.
+    </div>
+  </section>
+
+  <section>
+    <div class="sh reveal"><span class="sn">04</span><h2 class="st">Tabel Gabungan per Provinsi</h2><div class="sl"></div></div>
+    <div class="data-note reveal">⬡ Kolom kualifikasi bersumber dari Tabel 19 &amp; 20, Ikhtisar Data Pendidikan 2024/2025 (Pusdatin). Putus sekolah dari Dapodik TA 2022/2023. Kondisi RK dari Statistik SMA 2024/2025.</div>
+    <div class="twrap reveal">
+      <table class="dtbl">
+        <thead>
+          <tr>
+            <th>Provinsi</th>
+            <th class="h-s">Putus SMP</th>
+            <th class="h-a">Putus SMA</th>
+            <th class="h-g">≥S1 SMP %</th>
+            <th class="h-g">≥S1 SMA %</th>
+            <th class="h-r">RK Rusak Berat</th>
+            <th class="h-r">% RK RB</th>
+            <th>Flag</th>
+          </tr>
+        </thead>
+        <tbody id="tbody-gabungan"></tbody>
+      </table>
+    </div>
+  </section>
+</div>
+
+<!-- ══ PAGE: GURU ══════════════════════════════════════════════════ -->
+<div class="page" id="page-guru">
+  <section>
+    <div class="sh reveal"><span class="sn">01</span><h2 class="st">Ringkasan Kualifikasi Pendidik</h2><div class="sl"></div></div>
+    <div class="cg">
+      <div class="card c-guru reveal d1"><div class="ci">≥</div><div class="cl">Nasional SMP ≥S1</div><div class="cv">98,32%</div><div class="cs"><strong>709.953</strong> dari 722.118 pendidik</div></div>
+      <div class="card c-guru reveal d2"><div class="ci">≥</div><div class="cl">Nasional SMA ≥S1</div><div class="cv">98,88%</div><div class="cs"><strong>356.088</strong> dari 360.121 pendidik</div></div>
+      <div class="card c-amber reveal d3"><div class="ci">▼</div><div class="cl">Terendah SMP</div><div class="cv">90,01%</div><div class="cs"><strong>Papua Pegunungan</strong></div></div>
+      <div class="card c-amber reveal d4"><div class="ci">▼</div><div class="cl">Terendah SMA</div><div class="cv">96,51%</div><div class="cs"><strong>Papua Pegunungan</strong></div></div>
+      <div class="card c-baik reveal d5"><div class="ci">▲</div><div class="cl">Tertinggi SMP</div><div class="cv">99,29%</div><div class="cs"><strong>Bali</strong></div></div>
+      <div class="card c-baik reveal d6"><div class="ci">▲</div><div class="cl">Tertinggi SMA</div><div class="cv">99,86%</div><div class="cs"><strong>Sulawesi Tengah</strong></div></div>
+    </div>
+    <div class="data-note reveal">⬡ Sumber: Ikhtisar Data Pendidikan 2024/2025, Tabel 19 (SMP) dan Tabel 20 (SMA), Pusdatin Kemendikdasmen, Jakarta 2025. Kolom (7) dari masing-masing tabel: persentase kepala sekolah dan pendidik dengan kualifikasi ≥S1 tiap provinsi, TA 2024/2025.</div>
+    <div class="narasi ng reveal">
+      <strong>Secara nasional, kualifikasi formal pendidik Indonesia sudah sangat tinggi.</strong>
+      98,32% pendidik SMP dan 98,88% pendidik SMA memiliki ijazah ≥S1.
+      Kesenjangan terbesar terjadi di wilayah Papua: Papua Pegunungan (SMP 90,01%, SMA 96,51%)
+      dan Papua Tengah (SMP 95,42%, SMA 98,26%) — keduanya di bawah rata-rata nasional untuk jenjang SMP.
+      <strong>Seluruh 37 provinsi lainnya berada di atas 96% untuk SMP, dan di atas 98% untuk SMA.</strong>
+    </div>
+  </section>
+  <section>
+    <div class="sh reveal"><span class="sn">02</span><h2 class="st">% Pendidik ≥S1 per Provinsi</h2><div class="sl"></div></div>
+    <div class="ctrl-row reveal" id="srt-guru">
+      <span class="sl2">Jenjang:</span>
+      <button class="cbtn on" data-j="smp">SMP</button>
+      <button class="cbtn" data-j="sma">SMA</button>
+      <span class="sl2" style="margin-left:.5rem">Urut:</span>
+      <button class="cbtn on2" data-s="asc">Terendah ↑</button>
+      <button class="cbtn" data-s="desc">Tertinggi ↓</button>
+      <button class="cbtn" data-s="alpha">Alfabet</button>
+    </div>
+    <div class="bwrap reveal" id="bar-guru"></div>
+  </section>
+  <section>
+    <div class="sh reveal"><span class="sn">03</span><h2 class="st">Perbandingan SMP vs SMA per Provinsi</h2><div class="sl"></div></div>
+    <div class="data-note reveal">⬡ Perbedaan (gap) antara % ≥S1 SMA dan SMP. Nilai positif = SMA lebih tinggi dari SMP. Sumber: Tabel 19 &amp; 20, Ikhtisar Data Pendidikan 2024/2025.</div>
+    <div class="bwrap reveal" id="bar-gap"></div>
+  </section>
+</div>
+
+<!-- ══ PAGE: SMP ═══════════════════════════════════════════════════ -->
+<div class="page" id="page-smp">
+  <section>
+    <div class="sh reveal"><span class="sn">01</span><h2 class="st">Ringkasan Putus Sekolah SMP</h2><div class="sl"></div></div>
+    <div class="cg">
+      <div class="card c-amber reveal d1"><div class="ci">▦</div><div class="cl">Total Nasional</div><div class="cv" data-target="13716">0</div><div class="cs">Siswa SMP putus sekolah</div></div>
+      <div class="card c-rusak reveal d2"><div class="ci">▲</div><div class="cl">Tertinggi</div><div class="cv" data-target="1792">0</div><div class="cs"><strong>Jawa Timur</strong> · 13,1%</div></div>
+      <div class="card c-baik reveal d3"><div class="ci">▼</div><div class="cl">Terendah</div><div class="cv" data-target="14">0</div><div class="cs"><strong>DI Yogyakarta</strong></div></div>
+      <div class="card c-smp reveal d4"><div class="ci">≈</div><div class="cl">Rata-rata</div><div class="cv" data-target="392">0</div><div class="cs">Per provinsi (35 wilayah)</div></div>
+    </div>
+    <div class="data-note reveal">⬡ Sumber: Dapodik / Kemendikdasmen, Tahun Ajaran 2022/2023. Data tingkat provinsi.</div>
+    <div class="narasi ns reveal">
+      <strong>Jawa Timur (1.792), Sumatera Utara (1.666), dan Jawa Barat (1.217) menyumbang 35,5% dari total putus sekolah SMP nasional.</strong>
+      Di luar Jawa–Sumatera: NTT (866), Papua (856), dan Sulawesi Selatan (717) menonjol.
+      DI Yogyakarta (14) dan Kepulauan Riau (19) secara konsisten paling rendah.
+    </div>
+  </section>
+  <section>
+    <div class="sh reveal"><span class="sn">02</span><h2 class="st">Bar Chart per Provinsi</h2><div class="sl"></div></div>
+    <div class="ctrl-row reveal" id="srt-smp"><span class="sl2">Urut:</span>
+      <button class="cbtn on" data-s="desc">Tertinggi ↓</button>
+      <button class="cbtn" data-s="asc">Terendah ↑</button>
+      <button class="cbtn" data-s="alpha">Alfabet</button>
+    </div>
+    <div class="bwrap reveal" id="bar-smp"></div>
+  </section>
+  <section>
+    <div class="sh reveal"><span class="sn">03</span><h2 class="st">5 Tertinggi &amp; 5 Terendah</h2><div class="sl"></div></div>
+    <div class="two-col reveal" id="rank-smp"></div>
+  </section>
+</div>
+
+<!-- ══ PAGE: SMA ═══════════════════════════════════════════════════ -->
+<div class="page" id="page-sma">
+  <section>
+    <div class="sh reveal"><span class="sn">01</span><h2 class="st">Ringkasan Putus Sekolah SMA</h2><div class="sl"></div></div>
+    <div class="cg">
+      <div class="card c-amber reveal d1"><div class="ci">▦</div><div class="cl">Total Nasional</div><div class="cv" data-target="10091">0</div><div class="cs">Siswa SMA putus sekolah</div></div>
+      <div class="card c-rusak reveal d2"><div class="ci">▲</div><div class="cl">Tertinggi</div><div class="cv" data-target="924">0</div><div class="cs"><strong>Sulawesi Selatan</strong> · 9,2%</div></div>
+      <div class="card c-baik reveal d3"><div class="ci">▼</div><div class="cl">Terendah</div><div class="cv" data-target="5">0</div><div class="cs"><strong>DI Yogyakarta</strong></div></div>
+      <div class="card c-sma reveal d4"><div class="ci">≈</div><div class="cl">Rata-rata</div><div class="cv" data-target="288">0</div><div class="cs">Per provinsi (35 wilayah)</div></div>
+    </div>
+    <div class="data-note reveal">⬡ Sumber: Dapodik / Kemendikdasmen, Tahun Ajaran 2022/2023. Data tingkat provinsi.</div>
+    <div class="narasi na reveal">
+      <strong>Sulawesi Selatan (924) memimpin putus sekolah SMA — berbeda dari SMP di mana Jawa Timur tertinggi.</strong>
+      NTB (919) dan Jawa Timur (842) mengikuti. DI Yogyakarta kembali terendah (5 siswa).
+      <strong>NTB adalah outlier yang paling mencolok:</strong> hanya peringkat 18 untuk putus sekolah SMP (319 siswa), tapi peringkat 2 untuk SMA (919 siswa) — rasio SMA/SMP tertinggi nasional.
+    </div>
+  </section>
+  <section>
+    <div class="sh reveal"><span class="sn">02</span><h2 class="st">Bar Chart per Provinsi</h2><div class="sl"></div></div>
+    <div class="ctrl-row reveal" id="srt-sma"><span class="sl2">Urut:</span>
+      <button class="cbtn on" data-s="desc">Tertinggi ↓</button>
+      <button class="cbtn" data-s="asc">Terendah ↑</button>
+      <button class="cbtn" data-s="alpha">Alfabet</button>
+    </div>
+    <div class="bwrap reveal" id="bar-sma"></div>
+  </section>
+  <section>
+    <div class="sh reveal"><span class="sn">03</span><h2 class="st">5 Tertinggi &amp; 5 Terendah</h2><div class="sl"></div></div>
+    <div class="two-col reveal" id="rank-sma"></div>
+  </section>
+</div>
+
+<!-- ══ PAGE: SARPRAS ═══════════════════════════════════════════════ -->
+<div class="page" id="page-sarpras">
+  <section>
+    <div class="sh reveal"><span class="sn">01</span><h2 class="st">Kondisi Ruang Kelas SMA 2024/2025</h2><div class="sl"></div></div>
+    <div class="cg">
+      <div class="card c-amber reveal d1"><div class="ci">▦</div><div class="cl">Total Ruang Kelas</div><div class="cv" data-target="193743">0</div><div class="cs">Negeri + Swasta nasional</div></div>
+      <div class="card c-baik reveal d2"><div class="ci">✓</div><div class="cl">Kondisi Baik</div><div class="cv" data-target="116793">0</div><div class="cs"><strong>60,3%</strong> dari total</div></div>
+      <div class="card c-smp reveal d3"><div class="ci">◔</div><div class="cl">Rusak Ringan</div><div class="cv" data-target="40690">0</div><div class="cs"><strong>21,0%</strong> dari total</div></div>
+      <div class="card c-sma reveal d4"><div class="ci">◑</div><div class="cl">Rusak Sedang</div><div class="cv" data-target="24309">0</div><div class="cs"><strong>12,5%</strong> dari total</div></div>
+      <div class="card c-rusak reveal d5"><div class="ci">✕</div><div class="cl">Rusak Berat</div><div class="cv" data-target="11951">0</div><div class="cs"><strong>6,2%</strong> dari total</div></div>
+    </div>
+    <div class="data-note reveal">⬡ Sumber: Statistik SMA 2024/2025, Tabel 61, Pusdatin Kemendikdasmen, Jakarta 2025. Mencakup sekolah negeri dan swasta.</div>
+    <div class="narasi nr reveal">
+      <strong>39,7% ruang kelas SMA Indonesia berada dalam kondisi rusak.</strong>
+      Papua Pegunungan mencatat % rusak berat tertinggi (15,7%), Sulawesi Tenggara (13,6%), Papua (10,1%).
+      DKI Jakarta dan DI Yogyakarta konsisten terbaik: masing-masing 0,4% dan 4,4% rusak berat.
+      Jawa Barat memiliki jumlah absolut rusak berat terbanyak (1.199 ruang) karena skala provinsi terbesar.
+    </div>
+  </section>
+  <section>
+    <div class="sh reveal"><span class="sn">02</span><h2 class="st">% Rusak Berat per Provinsi</h2><div class="sl"></div></div>
+    <div class="ctrl-row reveal" id="srt-rk"><span class="sl2">Urut:</span>
+      <button class="cbtn on" data-s="pct-rb">% Rusak Berat ↓</button>
+      <button class="cbtn" data-s="total">Total RK ↓</button>
+      <button class="cbtn" data-s="alpha">Alfabet</button>
+    </div>
+    <div class="bwrap reveal" id="bar-rk"></div>
+  </section>
+</div>
+
+</main>
+
+<footer>
+  <div>
+    <div>Dewong Kurniawan &nbsp;·&nbsp; <a href="https://x.com/ngabeledug">@ngabeledug</a></div>
+    <div style="margin-top:.3rem">Tableau Public: <a href="https://public.tableau.com/profile/dewong.kurniawan">dewong.kurniawan</a></div>
+  </div>
+  <div style="text-align:right">
+    <div>Dapodik TA 2022/2023 · Statistik SMA 2024/2025 · Ikhtisar Data Pendidikan 2024/2025</div>
+    <div style="margin-top:.3rem">Kemendikdasmen / Pusdatin · Jakarta</div>
+  </div>
+</footer>
+<div class="tooltip" id="tt"></div>
+
+<script>
+// ══ DATA ════════════════════════════════════════════════════════
+// Kualifikasi pendidik ≥S1 — Tabel 19 (SMP) dan Tabel 20 (SMA)
+// Sumber: Ikhtisar Data Pendidikan 2024/2025, Pusdatin Kemendikdasmen
+const GURU = [
+  {kd:"11",prov:"Aceh",               s1smp:98.63,s1sma:99.31},
+  {kd:"12",prov:"Sumatera Utara",     s1smp:98.29,s1sma:98.45},
+  {kd:"13",prov:"Sumatera Barat",     s1smp:98.91,s1sma:99.50},
+  {kd:"14",prov:"Riau",               s1smp:97.80,s1sma:98.79},
+  {kd:"15",prov:"Jambi",              s1smp:98.61,s1sma:99.20},
+  {kd:"16",prov:"Sumatera Selatan",   s1smp:98.46,s1sma:98.66},
+  {kd:"17",prov:"Bengkulu",           s1smp:98.86,s1sma:99.16},
+  {kd:"18",prov:"Lampung",            s1smp:97.42,s1sma:98.86},
+  {kd:"19",prov:"Kep. Bangka Belitung",s1smp:98.87,s1sma:99.21},
+  {kd:"21",prov:"Kepulauan Riau",     s1smp:98.17,s1sma:98.85},
+  {kd:"31",prov:"DKI Jakarta",        s1smp:98.17,s1sma:98.17},
+  {kd:"32",prov:"Jawa Barat",         s1smp:97.67,s1sma:98.58},
+  {kd:"33",prov:"Jawa Tengah",        s1smp:98.84,s1sma:99.10},
+  {kd:"34",prov:"DI Yogyakarta",      s1smp:98.81,s1sma:98.88},
+  {kd:"35",prov:"Jawa Timur",         s1smp:98.57,s1sma:99.02},
+  {kd:"36",prov:"Banten",             s1smp:98.10,s1sma:98.90},
+  {kd:"51",prov:"Bali",               s1smp:99.29,s1sma:99.10},
+  {kd:"52",prov:"NTB",                s1smp:98.56,s1sma:99.11},
+  {kd:"53",prov:"NTT",                s1smp:98.46,s1sma:98.76},
+  {kd:"61",prov:"Kalimantan Barat",   s1smp:97.95,s1sma:98.27},
+  {kd:"62",prov:"Kalimantan Tengah",  s1smp:98.67,s1sma:99.26},
+  {kd:"63",prov:"Kalimantan Selatan", s1smp:99.08,s1sma:98.91},
+  {kd:"64",prov:"Kalimantan Timur",   s1smp:98.45,s1sma:99.21},
+  {kd:"65",prov:"Kalimantan Utara",   s1smp:99.02,s1sma:99.60},
+  {kd:"71",prov:"Sulawesi Utara",     s1smp:97.74,s1sma:99.32},
+  {kd:"72",prov:"Sulawesi Tengah",    s1smp:98.80,s1sma:99.86},
+  {kd:"73",prov:"Sulawesi Selatan",   s1smp:99.00,s1sma:99.32},
+  {kd:"74",prov:"Sulawesi Tenggara",  s1smp:98.81,s1sma:98.83},
+  {kd:"75",prov:"Gorontalo",          s1smp:98.89,s1sma:99.75},
+  {kd:"76",prov:"Sulawesi Barat",     s1smp:98.08,s1sma:99.31},
+  {kd:"81",prov:"Maluku",             s1smp:97.38,s1sma:98.81},
+  {kd:"82",prov:"Maluku Utara",       s1smp:98.02,s1sma:98.59},
+  {kd:"91",prov:"Papua",              s1smp:96.81,s1sma:98.04},
+  {kd:"92",prov:"Papua Barat",        s1smp:97.46,s1sma:98.11},
+  {kd:"93",prov:"Papua Selatan",      s1smp:97.85,s1sma:98.81},
+  {kd:"94",prov:"Papua Tengah",       s1smp:95.42,s1sma:98.26},
+  {kd:"95",prov:"Papua Pegunungan",   s1smp:90.01,s1sma:96.51},
+  {kd:"96",prov:"Papua Barat Daya",   s1smp:98.10,s1sma:98.21},
+];
+
+const SMP_D = [
+  {kd:"11",prov:"Aceh",smp:440},{kd:"12",prov:"Sumatera Utara",smp:1666},
+  {kd:"13",prov:"Sumatera Barat",smp:309},{kd:"14",prov:"Riau",smp:498},
+  {kd:"15",prov:"Jambi",smp:160},{kd:"16",prov:"Sumatera Selatan",smp:524},
+  {kd:"17",prov:"Bengkulu",smp:91},{kd:"18",prov:"Lampung",smp:199},
+  {kd:"19",prov:"Kep. Bangka Belitung",smp:31},{kd:"21",prov:"Kepulauan Riau",smp:19},
+  {kd:"31",prov:"DKI Jakarta",smp:272},{kd:"32",prov:"Jawa Barat",smp:1217},
+  {kd:"33",prov:"Jawa Tengah",smp:464},{kd:"34",prov:"DI Yogyakarta",smp:14},
+  {kd:"35",prov:"Jawa Timur",smp:1792},{kd:"36",prov:"Banten",smp:471},
+  {kd:"51",prov:"Bali",smp:46},{kd:"52",prov:"NTB",smp:319},
+  {kd:"53",prov:"NTT",smp:866},{kd:"61",prov:"Kalimantan Barat",smp:384},
+  {kd:"62",prov:"Kalimantan Tengah",smp:220},{kd:"63",prov:"Kalimantan Selatan",smp:183},
+  {kd:"64",prov:"Kalimantan Timur",smp:184},{kd:"65",prov:"Kalimantan Utara",smp:39},
+  {kd:"71",prov:"Sulawesi Utara",smp:181},{kd:"72",prov:"Sulawesi Tengah",smp:500},
+  {kd:"73",prov:"Sulawesi Selatan",smp:717},{kd:"74",prov:"Sulawesi Tenggara",smp:230},
+  {kd:"75",prov:"Gorontalo",smp:183},{kd:"76",prov:"Sulawesi Barat",smp:166},
+  {kd:"81",prov:"Maluku",smp:211},{kd:"82",prov:"Maluku Utara",smp:144},
+  {kd:"91",prov:"Papua",smp:856},{kd:"92",prov:"Papua Barat",smp:112},
+];
+const SMA_MAP = {"11":299,"12":1263,"13":241,"14":232,"15":191,"16":397,"17":119,"18":261,"19":23,"21":61,"31":337,"32":688,"33":166,"34":5,"35":842,"36":342,"51":21,"52":919,"53":596,"61":167,"62":104,"63":62,"64":75,"65":16,"71":154,"72":270,"73":924,"74":211,"75":168,"76":82,"81":262,"82":103,"91":402,"92":72};
+const RK_MAP = {"11":[3155,1626,1200,704,6685],"12":[8245,3168,1505,874,13792],"13":[3042,1398,806,421,5667],"14":[4256,1364,532,269,6421],"15":[1771,706,461,263,3201],"16":[4374,1810,1327,235,7746],"17":[984,553,423,85,2045],"18":[3550,1197,946,613,6306],"19":[728,152,123,126,1129],"21":[1576,230,158,100,2064],"31":[6420,536,21,30,7007],"32":[16434,5204,3495,1199,26332],"33":[9577,2930,1687,894,15088],"34":[1603,406,217,102,2328],"35":[13223,3841,2173,1058,20295],"36":[5375,1452,587,343,7757],"51":[2390,498,88,159,3135],"52":[1852,1070,1171,229,4322],"53":[4379,1937,1081,731,8128],"61":[2956,1029,483,420,4888],"62":[1500,630,325,166,2621],"63":[1909,478,221,88,2696],"64":[1553,916,360,107,2936],"65":[466,176,58,45,745],"71":[1433,608,592,194,2827],"72":[1721,588,408,216,2933],"73":[4611,2555,1268,670,9104],"74":[1944,821,647,535,3947],"75":[835,156,56,109,1156],"76":[724,239,182,67,1212],"81":[1347,700,679,345,3071],"82":[968,409,332,205,1914],"91":[368,460,262,122,1212],"92":[400,219,61,29,709]};
+
+const GABUNGAN = SMP_D.map(d=>{
+  const sma=SMA_MAP[d.kd]||0;
+  const rk=RK_MAP[d.kd]||[0,0,0,0,1];
+  const g=GURU.find(x=>x.kd===d.kd);
+  return {kd:d.kd,prov:d.prov,smp:d.smp,sma,rk_rb:rk[3],rk_tj:rk[4],
+    pct_rb:rk[4]>0?rk[3]/rk[4]*100:0,
+    s1smp:g?g.s1smp:null,s1sma:g?g.s1sma:null};
+});
+
+const fmt=n=>typeof n==='number'&&n%1!==0?n.toFixed(2)+'%':n.toLocaleString('id-ID');
+const fmtn=n=>n.toLocaleString('id-ID');
+const C={smp:'#2c5f8a',sma:'#b85c1a',rusak:'#a82828',baik:'#2d7d4e',guru:'#6b4fa0',amber:'#b08800'};
+
+// ══ REVEAL ══════════════════════════════════════════════════════
+const obs=new IntersectionObserver(es=>{es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('visible');obs.unobserve(e.target);}});},{threshold:0.06});
+function reObserve(){document.querySelectorAll('.reveal:not(.visible)').forEach(el=>obs.observe(el));}
+reObserve();
+
+// ══ COUNTER ═════════════════════════════════════════════════════
+function counter(el,t,dur=1000){const t0=performance.now();(function tick(n){const p=Math.min((n-t0)/dur,1),e=1-Math.pow(1-p,3);el.textContent=fmtn(Math.round(e*t));if(p<1)requestAnimationFrame(tick);})(performance.now());}
+function attachCounters(){const co=new IntersectionObserver(es=>{es.forEach(e=>{if(e.isIntersecting&&!e.target.dataset.counted){e.target.dataset.counted='1';counter(e.target,+e.target.dataset.target);co.unobserve(e.target);}});},{threshold:0.5});document.querySelectorAll('[data-target]').forEach(el=>{if(!el.dataset.counted)co.observe(el);});}
+attachCounters();
+
+// ══ TABS ════════════════════════════════════════════════════════
+document.getElementById('nav-tabs').addEventListener('click',e=>{
+  const btn=e.target.closest('.nav-tab');if(!btn)return;
+  document.querySelectorAll('.nav-tab').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('page-'+btn.dataset.page).classList.add('active');
+  setTimeout(()=>{reObserve();attachCounters();if(btn.dataset.page==='gabungan')drawScatters();},50);
+});
+
+// ══ BAR GENERIC ═════════════════════════════════════════════════
+function buildBar(id,data,colorFn,valFn,numFn=null){
+  const c=document.getElementById(id);if(!c)return;c.innerHTML='';
+  const max=Math.max(...data.map(valFn));
+  data.forEach((d,i)=>{
+    const row=document.createElement('div');row.className='brow';
+    const p=document.createElement('div');p.className='bprov';p.textContent=d.prov;p.title=d.prov;
+    const t=document.createElement('div');t.className='btrack';
+    const f=document.createElement('div');f.className='bfill';f.style.background=colorFn(d);t.appendChild(f);
+    const n=document.createElement('div');n.className='bnum';n.textContent=numFn?numFn(d):fmtn(valFn(d));
+    row.appendChild(p);row.appendChild(t);row.appendChild(n);c.appendChild(row);
+    setTimeout(()=>{f.style.width=(valFn(d)/max*100)+'%';},40+i*10);
+  });
+}
+
+// ══ RANK CARDS ══════════════════════════════════════════════════
+function buildRank(id,data,valFn,ch,cl){
+  const c=document.getElementById(id);if(!c)return;c.innerHTML='';
+  const s=[...data].sort((a,b)=>valFn(b)-valFn(a));
+  const top5=s.slice(0,5),bot5=[...s].reverse().slice(0,5);
+  [[top5,ch,'5 Tertinggi'],[bot5,cl,'5 Terendah']].forEach(([list,col,lbl])=>{
+    const card=document.createElement('div');
+    card.style.cssText='background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden;box-shadow:var(--sh-sm)';
+    const hd=document.createElement('div');
+    hd.style.cssText=`padding:.65rem 1rem;font-family:var(--mono);font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;color:${col};background:${col}18;border-bottom:1px solid ${col}22`;
+    hd.textContent=lbl;card.appendChild(hd);
+    list.forEach((d,i)=>{
+      const item=document.createElement('div');
+      item.style.cssText='display:flex;align-items:center;gap:.7rem;padding:.5rem 1rem;border-bottom:1px solid var(--border2);transition:background .12s';
+      item.onmouseenter=()=>item.style.background='var(--bg2)';item.onmouseleave=()=>item.style.background='';
+      item.innerHTML=`<span style="font-family:var(--mono);font-size:10px;color:var(--dim);width:16px;text-align:right">${i+1}</span>
+        <span style="flex:1;font-size:13px;color:var(--body)">${d.prov}</span>
+        <span style="font-family:var(--mono);font-size:12px;font-weight:500;color:${col}">${fmtn(valFn(d))}</span>`;
+      card.appendChild(item);
+    });
+    c.appendChild(card);
+  });
+}
+
+// ══ SMP PAGE ════════════════════════════════════════════════════
+let smpSort='desc';
+function renderSMP(){
+  const d=[...SMP_D];const r=[...d].sort((a,b)=>b.smp-a.smp);
+  const top5=new Set(r.slice(0,5).map(x=>x.kd)),bot5=new Set(r.slice(-5).map(x=>x.kd));
+  const sorted=smpSort==='desc'?r:smpSort==='asc'?[...d].sort((a,b)=>a.smp-b.smp):[...d].sort((a,b)=>a.prov.localeCompare(b.prov));
+  buildBar('bar-smp',sorted,d=>top5.has(d.kd)?'#e06060':bot5.has(d.kd)?'#6ab98a':'#5b7fb8',d=>d.smp);
+}
+renderSMP();buildRank('rank-smp',SMP_D,d=>d.smp,C.rusak,C.baik);
+document.getElementById('srt-smp').addEventListener('click',e=>{const b=e.target.closest('.cbtn');if(!b)return;document.querySelectorAll('#srt-smp .cbtn').forEach(x=>x.classList.remove('on'));b.classList.add('on');smpSort=b.dataset.s;renderSMP();});
+
+// ══ SMA PAGE ════════════════════════════════════════════════════
+const SMA_DATA=SMP_D.map(d=>({kd:d.kd,prov:d.prov,sma:SMA_MAP[d.kd]||0}));
+let smaSort='desc';
+function renderSMA(){
+  const d=[...SMA_DATA];const r=[...d].sort((a,b)=>b.sma-a.sma);
+  const top5=new Set(r.slice(0,5).map(x=>x.kd)),bot5=new Set(r.slice(-5).map(x=>x.kd));
+  const sorted=smaSort==='desc'?r:smaSort==='asc'?[...d].sort((a,b)=>a.sma-b.sma):[...d].sort((a,b)=>a.prov.localeCompare(b.prov));
+  buildBar('bar-sma',sorted,d=>top5.has(d.kd)?'#e8924a':bot5.has(d.kd)?'#6ab98a':'#5b7fb8',d=>d.sma);
+}
+renderSMA();buildRank('rank-sma',SMA_DATA,d=>d.sma,C.sma,C.baik);
+document.getElementById('srt-sma').addEventListener('click',e=>{const b=e.target.closest('.cbtn');if(!b)return;document.querySelectorAll('#srt-sma .cbtn').forEach(x=>x.classList.remove('on'));b.classList.add('on');smaSort=b.dataset.s;renderSMA();});
+
+// ══ SARPRAS PAGE ════════════════════════════════════════════════
+const RK_DATA=SMP_D.map(d=>{const rk=RK_MAP[d.kd]||[0,0,0,0,1];return{kd:d.kd,prov:d.prov,tb:rk[0],trb:rk[3],tj:rk[4],pct_rb:rk[4]>0?rk[3]/rk[4]*100:0};});
+let rkSort='pct-rb';
+function renderRK(){
+  const sorted=rkSort==='pct-rb'?[...RK_DATA].sort((a,b)=>b.pct_rb-a.pct_rb):rkSort==='total'?[...RK_DATA].sort((a,b)=>b.tj-a.tj):[...RK_DATA].sort((a,b)=>a.prov.localeCompare(b.prov));
+  buildBar('bar-rk',sorted,d=>{const h=120-d.pct_rb*6;return`hsl(${h},60%,42%)`;},d=>d.pct_rb,d=>d.pct_rb.toFixed(1)+'%');
+}
+renderRK();
+document.getElementById('srt-rk').addEventListener('click',e=>{const b=e.target.closest('.cbtn');if(!b)return;document.querySelectorAll('#srt-rk .cbtn').forEach(x=>x.classList.remove('on'));b.classList.add('on');rkSort=b.dataset.s;renderRK();});
+
+// ══ GURU PAGE ═══════════════════════════════════════════════════
+let guruJ='smp',guruS='asc';
+function renderGuru(){
+  const vFn=d=>guruJ==='smp'?d.s1smp:d.s1sma;
+  const d=[...GURU];
+  const sorted=guruS==='asc'?[...d].sort((a,b)=>vFn(a)-vFn(b)):guruS==='desc'?[...d].sort((a,b)=>vFn(b)-vFn(a)):[...d].sort((a,b)=>a.prov.localeCompare(b.prov));
+  const col=guruJ==='smp'?C.smp:C.sma;
+  buildBar('bar-guru',sorted,d=>{const v=vFn(d);return v<95?'#a82828':v<97?'#b08800':v<98?'#5b7fb8':'#6b4fa0';},vFn,d=>vFn(d).toFixed(2)+'%');
+}
+renderGuru();
+
+// Gap chart
+const GAP_DATA=[...GURU].map(d=>({...d,gap:+(d.s1sma-d.s1smp).toFixed(2)})).sort((a,b)=>b.gap-a.gap);
+buildBar('bar-gap',GAP_DATA,d=>d.gap>=0?'#6b4fa0':'#b85c1a',d=>Math.abs(d.gap),d=>(d.gap>=0?'+':'')+d.gap.toFixed(2)+'pp');
+
+document.getElementById('srt-guru').addEventListener('click',e=>{
+  const b=e.target.closest('.cbtn');if(!b)return;
+  if(b.dataset.j){document.querySelectorAll('[data-j]').forEach(x=>x.classList.remove('on'));b.classList.add('on');guruJ=b.dataset.j;}
+  if(b.dataset.s){document.querySelectorAll('[data-s]').forEach(x=>x.classList.remove('on'));b.classList.add('on');guruS=b.dataset.s;}
+  renderGuru();
+});
+
+// ══ GABUNGAN TABLE ══════════════════════════════════════════════
+function initGabTable(){
+  const tbody=document.getElementById('tbody-gabungan');
+  const data=[...GABUNGAN].sort((a,b)=>(b.smp+b.sma)-(a.smp+a.sma));
+  const topSMP=new Set([...data].sort((a,b)=>b.smp-a.smp).slice(0,5).map(d=>d.kd));
+  const topSMA=new Set([...data].sort((a,b)=>b.sma-a.sma).slice(0,5).map(d=>d.kd));
+  const topRB=new Set([...data].sort((a,b)=>b.pct_rb-a.pct_rb).slice(0,5).map(d=>d.kd));
+  const lowGuru=new Set(GURU.sort((a,b)=>a.s1smp-b.s1smp).slice(0,3).map(d=>d.kd));
+
+  data.forEach(d=>{
+    const flags=[];
+    if(topSMP.has(d.kd))flags.push(`<span class="pill" style="background:#a8282815;color:${C.rusak}">SMP↑</span>`);
+    if(topSMA.has(d.kd))flags.push(`<span class="pill" style="background:#b85c1a15;color:${C.sma}">SMA↑</span>`);
+    if(topRB.has(d.kd)) flags.push(`<span class="pill" style="background:#a8282812;color:${C.rusak}">RB↑</span>`);
+    if(lowGuru.has(d.kd))flags.push(`<span class="pill" style="background:#b0880015;color:${C.amber}">Guru↓</span>`);
+    if(!flags.length)flags.push(`<span class="pill" style="background:var(--bg2);color:var(--dim)">—</span>`);
+
+    const gColor=d.s1smp!==null&&d.s1smp<96?C.amber:'var(--body)';
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td>${d.prov}</td>
+      <td style="font-family:var(--mono);color:${topSMP.has(d.kd)?C.rusak:'var(--body)'}">${fmtn(d.smp)}</td>
+      <td style="font-family:var(--mono);color:${topSMA.has(d.kd)?C.sma:'var(--body)'}">${fmtn(d.sma)}</td>
+      <td style="font-family:var(--mono);color:${gColor}">${d.s1smp!==null?d.s1smp.toFixed(2)+'%':'—'}</td>
+      <td style="font-family:var(--mono);color:var(--body)">${d.s1sma!==null?d.s1sma.toFixed(2)+'%':'—'}</td>
+      <td style="font-family:var(--mono);color:${topRB.has(d.kd)?C.rusak:'var(--body)'}">${fmtn(d.rk_rb)}</td>
+      <td style="font-family:var(--mono);color:${topRB.has(d.kd)?C.rusak:'var(--body)'}">${d.pct_rb.toFixed(1)}%</td>
+      <td style="white-space:nowrap">${flags.join(' ')}</td>`;
+    tbody.appendChild(tr);
+  });
+}
+initGabTable();
+
+// ══ SCATTER PLOTS ═══════════════════════════════════════════════
+function pearson(xs,ys){
+  const n=xs.length,mx=xs.reduce((a,b)=>a+b)/n,my=ys.reduce((a,b)=>a+b)/n;
+  const num=xs.reduce((s,x,i)=>s+(x-mx)*(ys[i]-my),0);
+  const dx=Math.sqrt(xs.reduce((s,x)=>s+(x-mx)**2,0)),dy=Math.sqrt(ys.reduce((s,y)=>s+(y-my)**2,0));
+  return (dx*dy)?num/(dx*dy):0;
+}
+
+let sDrawn=false;
+function drawScatters(){
+  if(sDrawn)return;sDrawn=true;
+
+  // Gabung SMP data dengan guru data
+  const d1=SMP_D.map(d=>{const g=GURU.find(x=>x.kd===d.kd);return g?{prov:d.prov,x:g.s1smp,y:d.smp}:null;}).filter(Boolean);
+  const d2=SMA_DATA.map(d=>{const g=GURU.find(x=>x.kd===d.kd);return g?{prov:d.prov,x:g.s1sma,y:d.sma}:null;}).filter(Boolean);
+
+  drawScat(document.getElementById('cv1'),d1,'% Pendidik SMP ≥S1','Putus Sekolah SMP',C.smp);
+  drawScat(document.getElementById('cv2'),d2,'% Pendidik SMA ≥S1','Putus Sekolah SMA',C.sma);
+}
+
+function drawScat(canvas,data,xLbl,yLbl,color){
+  if(!canvas)return;
+  const dpr=window.devicePixelRatio||1;
+  const W=canvas.offsetWidth||700,H=340;
+  canvas.width=W*dpr;canvas.height=H*dpr;
+  canvas.style.width=W+'px';canvas.style.height=H+'px';
+  const ctx=canvas.getContext('2d');ctx.scale(dpr,dpr);
+  const pad={t:20,r:20,b:50,l:65};
+  const pw=W-pad.l-pad.r,ph=H-pad.t-pad.b;
+
+  const xs=data.map(d=>d.x),ys=data.map(d=>d.y);
+  const xMin=Math.min(...xs)-0.3,xMax=Math.max(...xs)+0.3;
+  const yMin=0,yMax=Math.max(...ys)*1.12;
+  const toX=v=>pad.l+(v-xMin)/(xMax-xMin)*pw;
+  const toY=v=>pad.t+ph-(v-yMin)/(yMax-yMin)*ph;
+
+  ctx.fillStyle='#fff';ctx.fillRect(0,0,W,H);
+  ctx.strokeStyle='#ece8e0';ctx.lineWidth=1;
+  for(let i=0;i<=5;i++){
+    const y=pad.t+ph*i/5;ctx.beginPath();ctx.moveTo(pad.l,y);ctx.lineTo(pad.l+pw,y);ctx.stroke();
+    ctx.fillStyle='#b8b0a5';ctx.font='10px IBM Plex Mono,monospace';ctx.textAlign='right';
+    ctx.fillText(Math.round(yMax-(yMax-yMin)*i/5).toLocaleString('id-ID'),pad.l-5,y+4);
+  }
+  for(let i=0;i<=5;i++){
+    const x=pad.l+pw*i/5;ctx.beginPath();ctx.moveTo(x,pad.t);ctx.lineTo(x,pad.t+ph);ctx.stroke();
+    ctx.fillStyle='#b8b0a5';ctx.textAlign='center';
+    ctx.fillText((xMin+(xMax-xMin)*i/5).toFixed(1)+'%',x,H-pad.b+16);
+  }
+
+  const r=pearson(xs,ys);
+  const n=xs.length,mx=xs.reduce((a,b)=>a+b)/n,my=ys.reduce((a,b)=>a+b)/n;
+  const sl=xs.reduce((s,x,i)=>s+(x-mx)*(ys[i]-my),0)/xs.reduce((s,x)=>s+(x-mx)**2,0)||0;
+  const ic=my-sl*mx;
+  ctx.strokeStyle=color+'55';ctx.lineWidth=1.5;ctx.setLineDash([5,4]);
+  ctx.beginPath();ctx.moveTo(toX(xMin),toY(sl*xMin+ic));ctx.lineTo(toX(xMax),toY(sl*xMax+ic));
+  ctx.stroke();ctx.setLineDash([]);
+
+  ctx.fillStyle=color;ctx.font='bold 11px IBM Plex Mono,monospace';ctx.textAlign='left';
+  ctx.fillText(`r = ${r.toFixed(2)}`,pad.l+8,pad.t+16);
+
+  data.forEach(d=>{
+    ctx.beginPath();ctx.arc(toX(d.x),toY(d.y),5.5,0,Math.PI*2);
+    ctx.fillStyle=color+'bb';ctx.fill();
+    ctx.strokeStyle=color;ctx.lineWidth=1;ctx.stroke();
+  });
+
+  ctx.fillStyle='#8a8278';ctx.font='11px Outfit,sans-serif';ctx.textAlign='center';
+  ctx.fillText(xLbl,pad.l+pw/2,H-8);
+  ctx.save();ctx.translate(14,pad.t+ph/2);ctx.rotate(-Math.PI/2);ctx.fillText(yLbl,0,0);ctx.restore();
+
+  const tt=document.getElementById('tt');
+  canvas.onmousemove=e=>{
+    const rect=canvas.getBoundingClientRect();
+    const mx=e.clientX-rect.left,my=e.clientY-rect.top;
+    let hit=null,minD=Infinity;
+    data.forEach(d=>{const cx=toX(d.x),cy=toY(d.y),dist=Math.hypot(mx-cx,my-cy);if(dist<18&&dist<minD){minD=dist;hit=d;}});
+    if(hit){tt.style.display='block';tt.style.left=(e.clientX+12)+'px';tt.style.top=(e.clientY-20)+'px';
+      tt.innerHTML=`<strong>${hit.prov}</strong><br>${xLbl}: <b>${hit.x.toFixed(2)}%</b><br>${yLbl}: <b>${fmtn(hit.y)}</b>`;}
+    else tt.style.display='none';
+  };
+  canvas.onmouseleave=()=>tt.style.display='none';
+}
+setTimeout(drawScatters,300);
+</script>
+</body>
+</html>
